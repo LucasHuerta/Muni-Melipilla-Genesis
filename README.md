@@ -1,10 +1,10 @@
-# 🏛️ Network Infrastructure Renewal — Municipalidad de Melipilla
+# Network Infrastructure Renewal — Municipalidad de Melipilla
 
-> **Enterprise-grade network redesign for a Chilean municipal government**, achieving full redundancy, security compliance, and modern segmentation across a 3-floor building with 11 departments.
+Enterprise-grade network redesign for a Chilean municipal government, achieving full redundancy, security compliance, and modern segmentation across a 3-floor building with 11 departments.
 
 ---
 
-## 📋 Project Overview
+## Project Overview
 
 | Field | Detail |
 |---|---|
@@ -17,23 +17,24 @@
 
 ---
 
-## 🚨 Problem Statement
+## Problem Statement
 
-The municipality was operating a **decade-old network** with critical vulnerabilities:
+The municipality was operating a decade-old network with critical vulnerabilities:
 
-- ❌ Non-compliance with Chilean Cybersecurity Framework Law (N°21.663)
-- ❌ Recurring connectivity failures with no redundancy
-- ❌ No network segmentation — all departments on flat network
-- ❌ Static IP addressing across 200+ endpoints
-- ❌ No intrusion detection or centralized logging
-- ❌ Unorganized, unlabeled cabling infrastructure
+- Non-compliance with Chilean Cybersecurity Framework Law (N°21.663)
+- Recurring connectivity failures with no redundancy
+- No network segmentation — all departments on flat network
+- Static IP addressing across 200+ endpoints
+- No intrusion detection or centralized logging
+- Unorganized, unlabeled cabling infrastructure
 
 ---
 
-## ✅ Solution Architecture
+## Solution Architecture
 
 ### Network Topology
-A **three-tier hierarchical model** was designed and implemented:
+
+A three-tier hierarchical model was designed and implemented:
 
 ```
 Internet (GTD ISP x2)
@@ -66,34 +67,32 @@ Internet (GTD ISP x2)
 
 ---
 
-## 🔧 Technologies Implemented
+## Technologies Implemented
 
 ### High Availability & Redundancy
-- **HSRP** (Hot Standby Router Protocol) — dual active/passive groups per VLAN cluster
-- **LACP** (IEEE 802.3ad) — link aggregation between core switches
-- **RPVST+** (IEEE 802.1w) — rapid convergence spanning tree per VLAN
+- HSRP (Hot Standby Router Protocol) — dual active/passive groups per VLAN cluster
+- LACP (IEEE 802.3ad) — link aggregation between core switches
+- RPVST+ (IEEE 802.1w) — rapid convergence spanning tree per VLAN
 
 ### Security Stack
-- **Fortinet FortiGate 200F** — dual perimeter firewalls in HA
-- **Snort IPS** — inline intrusion prevention on dedicated server
-- **Wazuh SIEM** — centralized security event correlation
-- **Rsyslog** — log aggregation from all network devices
-- **DHCP Server** — dynamic addressing with asset tracking integration
-- **Port Security** — MAC address binding on all access ports
-- **BPDUGuard + PortFast** — edge port hardening
-- **VACL + ACL** — inter-VLAN traffic filtering
-- **SSH** — encrypted management on all devices (no Telnet)
+- Fortinet FortiGate 200F — dual perimeter firewalls in HA
+- Snort IPS — inline intrusion prevention on dedicated server
+- Wazuh SIEM — centralized security event correlation
+- Rsyslog — log aggregation from all network devices
+- DHCP Server — dynamic addressing with asset tracking integration
+- Port Security — MAC address binding on all access ports
+- BPDUGuard + PortFast — edge port hardening
+- VACL + ACL — inter-VLAN traffic filtering
+- SSH — encrypted management on all devices (no Telnet)
 
 ### Physical Infrastructure
-- **Fiber optic backbone** — multimode 50/125 OM3, 1500m across building
-- **Structured cabling** — Cat6A UTP, labeled and documented
-- **12 racks** — 1 core rack + 11 distribution-access racks (one per department)
+- Fiber optic backbone — multimode 50/125 OM3, 1500m across building
+- Structured cabling — Cat6A UTP, labeled and documented
+- 12 racks — 1 core rack + 11 distribution-access racks (one per department)
 
 ---
 
-## 🛡️ Cybersecurity Compliance (Ley N°21.663)
-
-This project implements Chile's **Ley Marco de Ciberseguridad** requirements:
+## Cybersecurity Compliance (Ley N°21.663)
 
 | Requirement | Implementation |
 |---|---|
@@ -107,21 +106,21 @@ This project implements Chile's **Ley Marco de Ciberseguridad** requirements:
 
 ---
 
-## 📹 Live Demonstrations
+## Live Demonstrations
 
-All configurations were tested and recorded. Click to view each demo:
+All configurations were tested and recorded:
 
-| Demo | Description | Duration |
-|---|---|---|
-| [🎬 DHCP Server](evidence/videos/demo-dhcp-server.mp4) | Dynamic IP assignment across all VLANs | ~3 min |
-| [🎬 HSRP Redundancy](evidence/videos/demo-hsrp-redundancy.mp4) | Failover simulation — core switch down, traffic continues | ~4 min |
-| [🎬 Syslog Server](evidence/videos/demo-syslog-server.mp4) | Centralized log collection from Cisco devices | ~3 min |
-| [🎬 Wazuh SIEM](evidence/videos/demo-wazuh-siem.mp4) | Security event dashboard and alert correlation | ~5 min |
-| [🎬 Network Tracking](evidence/videos/demo-network-tracking.mp4) | End-to-end packet flow verification | ~3 min |
+| Demo | Description |
+|---|---|
+| [DHCP Server](evidence/videos/demo-dhcp-server.mp4) | Dynamic IP assignment across all VLANs |
+| [HSRP Redundancy](evidence/videos/demo-hsrp-redundancy.mp4) | Failover simulation — core switch down, traffic continues |
+| [Syslog Server](evidence/videos/demo-syslog-server.mp4) | Centralized log collection from Cisco devices |
+| [Wazuh SIEM](evidence/videos/demo-wazuh-siem.mp4) | Security event dashboard and alert correlation |
+| [Network Tracking](evidence/videos/demo-network-tracking.mp4) | End-to-end packet flow verification |
 
 ---
 
-## 💰 Budget Summary
+## Budget Summary
 
 | Equipment | Qty | Unit Price (CLP) | Total (CLP) |
 |---|---|---|---|
@@ -133,38 +132,32 @@ All configurations were tested and recorded. Click to view each demo:
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
-municipalidad-melipilla-network/
+Muni-Melipilla-Genesis/
 │
-├── README.md                        ← You are here
-│
-├── diagrams/                        ← Network diagrams
-│   ├── topology-logical.png         ← Full logical topology
-│   ├── rack-core.png                ← Core rack layout
-│   ├── floor-plan-physical.vsdx     ← Physical floor plans (Visio)
-│   └── racks-distribution.vsdx     ← Distribution rack diagrams
-│
-├── docs/                            ← Full technical documentation
-│   └── project-report-full.docx    ← Complete project portfolio report
-│
-├── evidence/                        ← Proof of implementation
+├── README.md
+├── diagrams/
+│   ├── topology-logical.png
+│   ├── rack-core.png
+│   ├── floor-plan-physical.vsdx
+│   └── racks-distribution.vsdx
+├── docs/
+│   └── project-report-full.docx
+├── evidence/
 │   └── videos/
 │       ├── demo-dhcp-server.mp4
 │       ├── demo-hsrp-redundancy.mp4
 │       ├── demo-syslog-server.mp4
 │       ├── demo-wazuh-siem.mp4
 │       └── demo-network-tracking.mp4
-│
-├── planning/                        ← Project management
-│   └── project-schedule.mpp        ← MS Project Gantt (105 days)
-│
-├── presentation/                    ← Final presentation
+├── planning/
+│   └── project-schedule.mpp
+├── presentation/
 │   ├── presentation.pptx
 │   └── presentation.pdf
-│
-└── security/                        ← Security documentation
+└── security/
     ├── VLAN-design.md
     ├── incident-response-plan.md
     └── compliance-ley21663.md
@@ -172,37 +165,33 @@ municipalidad-melipilla-network/
 
 ---
 
-## 🗂️ Project Timeline
+## Project Timeline
 
 ```
-Mar 2025          Apr 2025          May 2025          Jun 2025          Jul 2025          Aug 2025
-│─────────────────│─────────────────│─────────────────│─────────────────│─────────────────│
-│◄──── INICIO (43 days) ──────────►│◄──── EJECUCIÓN (55 days) ────────────────────────►│
-                                    │ Physical Install │  Net Config  │  Servers  │ Ley  │
-│                                                                                   Cierre│
+Mar 2025          May 2025          Jun 2025          Jul 2025          Aug 2025
+│─────────────────│─────────────────│─────────────────│─────────────────│
+│◄── INICIO (43d) ►│◄────────────── EJECUCIÓN (55d) ──────────────────►│
+                   │ Physical Install │ Net Config │ Servers │ Ley 21.663 │ Cierre
 ```
 
 ---
 
-## 👤 About the Author
+## About the Author
 
 **Lucas Huerta Cordero**
 Network Engineer · Cybersecurity Learner
-📍 Región Metropolitana, Chile
-🎓 Ingeniería en Conectividad y Redes — Duoc UC (2025)
+Región Metropolitana, Chile
+Ingeniería en Conectividad y Redes — Duoc UC (2025)
 
-Currently pursuing: `PortSwigger Web Academy` → `eJPT` → `OSCP`
+Currently pursuing: PortSwigger Web Academy → eJPT → OSCP
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://linkedin.com/in/tu-perfil)
-[![GitHub](https://img.shields.io/badge/GitHub-Portfolio-black?style=flat&logo=github)](https://github.com/tu-usuario)
+[LinkedIn](https://linkedin.com/in/tu-perfil) · [GitHub](https://github.com/LucasHuerta)
 
 ---
 
-## 📄 License
+## License
 
 This project is shared for educational and portfolio purposes.
 Network configurations and documentation are original work by the authors.
 
----
-
-*Built with Cisco IOS · Fortinet FortiOS · Wazuh · Snort · Linux*
+Built with Cisco IOS · Fortinet FortiOS · Wazuh · Snort · Linux
