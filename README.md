@@ -1,59 +1,61 @@
-# Network Infrastructure Renewal — Municipalidad de Melipilla
+# Renovación de Infraestructura de Red — Municipalidad de Melipilla
 
-Enterprise-grade network redesign for a Chilean municipal government, achieving full redundancy, security compliance, and modern segmentation across a 3-floor building with 11 departments.
+Proyecto de título desarrollado para la Ilustre Municipalidad de Melipilla, abordando la renovación completa de su infraestructura de red, la cual llevaba más de una década sin actualizaciones significativas.
 
 ---
 
-## Project Overview
+## Contexto del proyecto
 
-| Field | Detail |
+| | |
 |---|---|
-| **Client** | Ilustre Municipalidad de Melipilla, Chile |
-| **Scope** | Full LAN infrastructure renewal (Layer 2/3 + Security) |
-| **Duration** | 105 days (March – August 2025) |
-| **Team** | Juan Tapia Galleguillos · Lucas Huerta Cordero |
-| **Institution** | Duoc UC — Ingeniería en Conectividad y Redes |
-| **Compliance** | Ley Marco de Ciberseguridad N°21.663 · Ley Transformación Digital N°21.180 |
+| **Cliente** | Ilustre Municipalidad de Melipilla, Chile |
+| **Alcance** | Renovación completa LAN (Capa 2/3 + Seguridad) |
+| **Duración** | 105 días (Marzo – Agosto 2025) |
+| **Equipo** | Juan Tapia Galleguillos · Lucas Huerta Cordero |
+| **Institución** | Duoc UC — Ingeniería en Conectividad y Redes |
+| **Normativa** | Ley N°21.663 · Ley N°21.180 |
 
 ---
 
-## Problem Statement
+## El problema
 
-The municipality was operating a decade-old network with critical vulnerabilities:
+La red existente presentaba fallas recurrentes de conectividad y no cumplía con la Ley Marco de Ciberseguridad (N°21.663), lo que ponía en riesgo la operación diaria de la municipalidad y los datos de los ciudadanos.
 
-- Non-compliance with Chilean Cybersecurity Framework Law (N°21.663)
-- Recurring connectivity failures with no redundancy
-- No network segmentation — all departments on flat network
-- Static IP addressing across 200+ endpoints
-- No intrusion detection or centralized logging
-- Unorganized, unlabeled cabling infrastructure
+Problemas específicos detectados en el levantamiento inicial:
+
+- Red plana sin segmentación — todos los departamentos en el mismo dominio de broadcast
+- Direccionamiento IP estático en más de 200 equipos
+- Sin redundancia: una falla en el core dejaba sin red a todo el edificio
+- Sin sistema de detección de intrusos ni registro centralizado de eventos
+- Cableado sin etiquetar ni documentar
+- Incumplimiento de la Ley N°21.663
 
 ---
 
-## Solution Architecture
+## Solución implementada
 
-### Network Topology
+### Topología de red
 
-A three-tier hierarchical model was designed and implemented:
+Se diseñó e implementó un modelo jerárquico de tres capas:
 
 ```
 Internet (GTD ISP x2)
-        │
-  ┌─────┴─────┐
-  FW1          FW2        ← Fortinet FortiGate 200F (HA pair)
-  │             │
-  SWC1 ════ SWC2          ← Core: Cisco Catalyst C9500-24Y4C
-  │    LACP    │            HSRP Groups 1 & 2 (Active/Passive)
-  SW3  ════ SW4           ← Distribution: Cisco C9300-48P-A
-  │             │            RPVST+ per VLAN
-  └─────────────┘
-        │
-  [11 Access Racks — 3 Floors]
+        |
+  ------+------
+  FW1         FW2          Fortinet FortiGate 200F (par HA)
+  |            |
+  SWC1 ==== SWC2           Core: Cisco Catalyst C9500-24Y4C
+       LACP                HSRP Grupos 1 y 2 (Activo/Pasivo)
+  SW3  ==== SW4            Distribucion: Cisco C9300-48P-A
+  |            |           RPVST+ por VLAN
+  +-----------+
+        |
+  [11 racks de acceso — 3 pisos]
 ```
 
-### VLAN Segmentation
+### Segmentación por VLANs
 
-| VLAN ID | Department | Subnet |
+| VLAN | Departamento | Red |
 |---|---|---|
 | 10 | Administración / Finanzas | 10.255.10.0/24 |
 | 20 | Alcaldía | 10.255.20.0/24 |
@@ -62,81 +64,78 @@ Internet (GTD ISP x2)
 | 50 | Servicios / DIDECO | 10.255.50.0/24 |
 | 60 | Obras Municipales | 10.255.60.0/24 |
 | 70 | Municipio / Biblioteca | 10.255.70.0/24 |
-| 99 | Native VLAN | — |
-| 100 | Network Management | 10.255.100.0/24 |
+| 99 | VLAN Nativa | — |
+| 100 | Gestión de red | 10.255.100.0/24 |
 
 ---
 
-## Technologies Implemented
+## Stack tecnológico
 
-### High Availability & Redundancy
-- HSRP (Hot Standby Router Protocol) — dual active/passive groups per VLAN cluster
-- LACP (IEEE 802.3ad) — link aggregation between core switches
-- RPVST+ (IEEE 802.1w) — rapid convergence spanning tree per VLAN
+**Alta disponibilidad**
+- HSRP — dos grupos activo/pasivo, uno por cluster de VLANs
+- LACP IEEE 802.3ad — agregación de enlaces entre switches core
+- RPVST+ IEEE 802.1w — convergencia rápida por VLAN
 
-### Security Stack
-- Fortinet FortiGate 200F — dual perimeter firewalls in HA
-- Snort IPS — inline intrusion prevention on dedicated server
-- Wazuh SIEM — centralized security event correlation
-- Rsyslog — log aggregation from all network devices
-- DHCP Server — dynamic addressing with asset tracking integration
-- Port Security — MAC address binding on all access ports
-- BPDUGuard + PortFast — edge port hardening
-- VACL + ACL — inter-VLAN traffic filtering
-- SSH — encrypted management on all devices (no Telnet)
+**Seguridad**
+- Fortinet FortiGate 200F en par HA como perímetro
+- Snort IPS — detección y prevención de intrusos en línea
+- Wazuh SIEM — correlación centralizada de eventos de seguridad
+- Rsyslog — recolección de logs desde todos los dispositivos
+- Port Security — binding de MAC en puertos de acceso
+- BPDUGuard + PortFast — hardening de puertos edge
+- VACL + ACL — filtrado de tráfico inter-VLAN
+- SSH en todos los dispositivos (sin Telnet)
 
-### Physical Infrastructure
-- Fiber optic backbone — multimode 50/125 OM3, 1500m across building
-- Structured cabling — Cat6A UTP, labeled and documented
-- 12 racks — 1 core rack + 11 distribution-access racks (one per department)
+**Infraestructura física**
+- Fibra óptica multimodo OM3 50/125 — 1500m de backbone
+- Cableado estructurado Cat6A etiquetado y documentado
+- 12 racks: 1 core + 11 de distribución-acceso
 
 ---
 
-## Cybersecurity Compliance (Ley N°21.663)
+## Cumplimiento Ley N°21.663
 
-| Requirement | Implementation |
+| Requisito | Implementación |
 |---|---|
-| Incident detection system | Wazuh SIEM + Snort IPS |
-| Security alert levels | 5-tier alert matrix (Level 1–5) |
-| Maximum containment times | L1: 4h · L3: 60min · L5: 15min |
-| CSIRT national reporting | Standardized incident report format |
-| Staff security awareness | 9-module training program |
-| Dedicated security officer role | Defined in governance documentation |
-| ISO 27001 alignment | Security controls mapped to standard |
+| Sistema de detección de incidentes | Wazuh SIEM + Snort IPS |
+| Niveles de alerta definidos | Matriz de 5 niveles |
+| Tiempos máximos de contención | N1: 4h / N3: 60min / N5: 15min |
+| Reporte al CSIRT Nacional | Formato estandarizado documentado |
+| Programa de capacitación | 9 módulos para funcionarios |
+| Encargado de ciberseguridad | Definido en documentación de gobernanza |
 
 ---
 
-## Live Demonstrations
+## Demostraciones
 
-All configurations were tested and recorded:
+Las configuraciones fueron probadas y grabadas en video:
 
-| Demo | Description |
+| Demo | Descripción |
 |---|---|
-| [DHCP Server](evidence/videos/demo-dhcp-server.mp4) | Dynamic IP assignment across all VLANs |
-| [HSRP Redundancy](evidence/videos/demo-hsrp-redundancy.mp4) | Failover simulation — core switch down, traffic continues |
-| [Syslog Server](evidence/videos/demo-syslog-server.mp4) | Centralized log collection from Cisco devices |
-| [Wazuh SIEM](evidence/videos/demo-wazuh-siem.mp4) | Security event dashboard and alert correlation |
-| [Network Tracking](evidence/videos/demo-network-tracking.mp4) | End-to-end packet flow verification |
+| [DHCP Server](evidence/videos/demo-dhcp-server.mp4) | Asignación dinámica de IPs en todas las VLANs |
+| [HSRP Redundancy](evidence/videos/demo-hsrp-redundancy.mp4) | Simulación de failover con caída del switch core |
+| [Syslog Server](evidence/videos/demo-syslog-server.mp4) | Recolección centralizada de logs desde equipos Cisco |
+| [Wazuh SIEM](evidence/videos/demo-wazuh-siem.mp4) | Dashboard de eventos y correlación de alertas |
+| [Network Tracking](evidence/videos/demo-network-tracking.mp4) | Verificación de flujo de paquetes extremo a extremo |
 
 ---
 
-## Budget Summary
+## Presupuesto
 
-| Equipment | Qty | Unit Price (CLP) | Total (CLP) |
+| Equipo | Cant. | Precio unit. (CLP) | Total (CLP) |
 |---|---|---|---|
-| Cisco Catalyst C9500-24Y4C (Core SW) | 4 | $5,478,820 | $21,915,280 |
-| Cisco Catalyst C9300-48P-A (Access SW) | 18 | $4,100,000 | $73,800,000 |
-| Dell PowerEdge R440 (Servers) | 2 | $1,544,897 | $3,089,794 |
-| Fiber Optic OM3 50/125 (1500m) | 1 lot | — | $1,101,000 |
-| **Total** | | | **~$99,906,074** |
+| Cisco Catalyst C9500-24Y4C | 4 | $5.478.820 | $21.915.280 |
+| Cisco Catalyst C9300-48P-A | 18 | $4.100.000 | $73.800.000 |
+| Dell PowerEdge R440 | 2 | $1.544.897 | $3.089.794 |
+| Fibra óptica OM3 50/125 (1500m) | 1 | — | $1.101.000 |
+| **Total** | | | **~$99.906.074** |
 
 ---
 
-## Repository Structure
+## Estructura del repositorio
 
 ```
 Muni-Melipilla-Genesis/
-│
 ├── README.md
 ├── diagrams/
 │   ├── topology-logical.png
@@ -165,33 +164,22 @@ Muni-Melipilla-Genesis/
 
 ---
 
-## Project Timeline
+## Lo que aprendimos en el proceso
 
-```
-Mar 2025          May 2025          Jun 2025          Jul 2025          Aug 2025
-│─────────────────│─────────────────│─────────────────│─────────────────│
-│◄── INICIO (43d) ►│◄────────────── EJECUCIÓN (55d) ──────────────────►│
-                   │ Physical Install │ Net Config │ Servers │ Ley 21.663 │ Cierre
-```
+El mayor desafío fue la implementación de HSRP junto con RPVST+ de forma simultánea — hacer que los root bridges coincidieran con los gateways activos de cada grupo requirió varias iteraciones y pruebas de failover hasta que el comportamiento fue el esperado.
+
+La integración de Wazuh con Rsyslog para recibir logs de los equipos Cisco también tomó más tiempo del planificado, principalmente por diferencias en el formato de los syslog entre IOS versions.
 
 ---
 
-## About the Author
+## Autor
 
-**Lucas Huerta Cordero**
-Network Engineer · Cybersecurity Learner
-Región Metropolitana, Chile
+Lucas Huerta Cordero
 Ingeniería en Conectividad y Redes — Duoc UC (2025)
-
-Currently pursuing: PortSwigger Web Academy → eJPT → OSCP
+Región Metropolitana, Chile
 
 [LinkedIn](https://linkedin.com/in/tu-perfil) · [GitHub](https://github.com/LucasHuerta)
 
 ---
 
-## License
-
-This project is shared for educational and portfolio purposes.
-Network configurations and documentation are original work by the authors.
-
-Built with Cisco IOS · Fortinet FortiOS · Wazuh · Snort · Linux
+*Cisco IOS · Fortinet FortiOS · Wazuh · Snort · Linux*
