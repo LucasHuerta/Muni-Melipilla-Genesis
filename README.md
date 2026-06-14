@@ -178,7 +178,7 @@ Lucas Huerta Cordero
 Network and Connectivity Engineering — Duoc UC (2025)
 Santiago, Chile
 
-[LinkedIn](https://linkedin.com/in/tu-perfil) · [GitHub](https://github.com/LucasHuerta)
+[LinkedIn](https://www.linkedin.com/in/lucas-huerta-cordero) · [GitHub](https://github.com/LucasHuerta)
 
 ---
 
