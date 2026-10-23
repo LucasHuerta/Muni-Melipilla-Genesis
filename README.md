@@ -1,188 +1,177 @@
-# Renovación de Infraestructura de Red para la Municipalidad de Melipilla
+# Renovación de Infraestructura de Red — Municipalidad de Melipilla
 
-Proyecto de título desarrollado para la Ilustre Municipalidad de Melipilla, que abordó una renovación completa de la infraestructura de red de un recinto que no había sido actualizado significativamente en más de una década.
+Proyecto de título técnico (Duoc UC, 2025) que propone la renovación de la red LAN de la Ilustre Municipalidad de Melipilla, a partir del diagnóstico de una infraestructura sin actualizaciones relevantes en más de una década.
+
+> **Alcance:** propuesta técnica diseñada sobre el levantamiento de la red existente y validada en un entorno de laboratorio. **No fue implementada en la red productiva del municipio.** El direccionamiento IP, las VLANs y el presupuesto corresponden al diseño propuesto, no a la configuración real en operación.
 
 ---
 
-## Resumen del Proyecto
+## Resumen
 
 | | |
-| --------------- | ---------------------------------------------------------------------------------- |
-| **Cliente**      | Ilustre Municipalidad de Melipilla, Chile                                          |
-| **Alcance**       | Renovación completa de infraestructura LAN (Capa 2/3 + Seguridad)                 |
-| **Duración**    | 105 días (marzo a agosto de 2025)                                                  |
-| **Equipo**        | Juan Tapia Galleguillos · Lucas Huerta Cordero                                     |
-| **Institución** | Duoc UC, Ingeniería en Conectividad y Redes                                       |
-| **Cumplimiento**  | Ley N°21.663 (Marco de Ciberseguridad) · Ley N°21.180 (Transformación Digital) |
+| --- | --- |
+| **Institución** | Duoc UC, Sede Melipilla — Administración de Redes y Telecomunicaciones |
+| **Tipo** | Proyecto de título técnico (propuesta validada en laboratorio) |
+| **Período** | Marzo a agosto de 2025 |
+| **Equipo** | Juan Tapia Galleguillos · Lucas Huerta Cordero |
+| **Alcance técnico** | Red LAN jerárquica (capa 2/3), alta disponibilidad, monitoreo y seguridad para más de 200 equipos |
+| **Marco normativo** | Ley N° 21.663 (Marco de Ciberseguridad) · Ley N° 21.180 (Transformación Digital del Estado) |
+
+---
+
+## Mi rol
+
+Proyecto desarrollado en equipo de dos personas. Mis responsabilidades principales fueron:
+
+- **Diseño lógico de capa 2/3:** segmentación por VLAN, grupos HSRP, agregación de enlaces (LACP/EtherChannel), RPVST+, ACL entre VLANs y Port Security.
+- **Seguridad y monitoreo:** integración de Wazuh (SIEM), Snort (IPS), Rsyslog y el perímetro con FortiGate.
+- **Cumplimiento de la Ley N° 21.663:** matriz de niveles de alerta, tiempos de contención, plan de respuesta a incidentes, formato de reporte y programa de capacitación.
 
 ---
 
 ## Problemática
 
-La red existente presentaba fallas recurrentes de conectividad y no cumplía con la Ley Marco de Ciberseguridad (N°21.663), poniendo en riesgo la operación diaria del municipio y los datos de la ciudadanía.
+El diagnóstico inicial identificó fallas recurrentes de conectividad y brechas frente a la Ley N° 21.663:
 
-Problemas específicos detectados en el diagnóstico inicial:
-
-- Red plana sin segmentación: todos los departamentos compartían el mismo dominio de broadcast
-- Direccionamiento IP estático en más de 200 equipos
-- Sin redundancia: una falla en el core dejaba caído todo el edificio
-- Sin detección de intrusiones ni registro centralizado de eventos
-- Cableado sin etiquetar ni documentar
-- Incumplimiento de la Ley N°21.663
+- Red plana, sin segmentación: todos los departamentos en un mismo dominio de broadcast.
+- Direccionamiento IP estático en más de 200 equipos.
+- Sin redundancia: una falla en el núcleo dejaba sin servicio a todo el edificio.
+- Sin detección de intrusiones ni registro centralizado de eventos.
+- Cableado sin etiquetar ni documentar.
 
 ---
 
-## Arquitectura de la Solución
+## Arquitectura propuesta
 
-### Topología de Red
+Modelo jerárquico de tres capas (núcleo, distribución y acceso), con doble enlace a Internet, par de firewalls y núcleo redundante.
 
-Se diseñó e implementó un modelo jerárquico de tres capas:
+![Topología lógica de la red propuesta](diagrams/topology-logical.png)
 
-```
-Internet (ISP GTD x2)
-        |
-  ------+------
-  FW1         FW2          Fortinet FortiGate 200F (par HA)
-  |            |
-  SWC1 ==== SWC2           Core: Cisco Catalyst C9500-24Y4C
-       LACP                Grupos HSRP 1 y 2 (Activo/Pasivo)
-  SW3  ==== SW4            Distribución: Cisco C9300-48P-A
-  |            |           RPVST+ por VLAN
-  +-----------+
-        |
-  [11 racks de acceso distribuidos en 3 pisos]
-```
+| Capa | Equipamiento | Función |
+| --- | --- | --- |
+| Perímetro | 2 × Fortinet FortiGate 200F, 2 enlaces ISP | Firewall y salida a Internet redundante |
+| Núcleo | Cisco Catalyst C9500-24Y4C (SWC1, SWC2) | Gateways HSRP, enrutamiento inter-VLAN |
+| Distribución / acceso | Cisco Catalyst C9300-48P-A | Conexión de departamentos por piso, PoE+ |
+| Servicios | Servidores Dell PowerEdge R440 | DHCP + Syslog, IPS |
+
+![Rack del núcleo](diagrams/rack-core.png)
 
 ### Segmentación de VLANs
 
-| VLAN | Departamento              | Subred          |
-| ---- | ------------------------- | --------------- |
-| 10   | Administración / Finanzas | 10.255.10.0/24  |
-| 20   | Alcaldía                  | 10.255.20.0/24  |
-| 30   | Recursos Humanos          | 10.255.30.0/24  |
-| 40   | Departamento de TI        | 10.255.40.0/24  |
-| 50   | Servicios / DIDECO        | 10.255.50.0/24  |
-| 60   | Obras Públicas            | 10.255.60.0/24  |
-| 70   | Municipal General         | 10.255.70.0/24  |
-| 99   | VLAN Nativa                | N/A             |
-| 100  | Gestión de Red             | 10.255.100.0/24 |
+| VLAN | Uso | Subred | Grupo HSRP |
+| --- | --- | --- | --- |
+| 10 | Administración / Finanzas | 10.255.10.0/24 | 1 |
+| 20 | Alcaldía | 10.255.20.0/24 | 1 |
+| 30 | Recursos Humanos | 10.255.30.0/24 | 1 |
+| 40 | Informática | 10.255.40.0/24 | 1 |
+| 50 | Servicios / DIDECO | 10.255.50.0/24 | 2 |
+| 60 | Obras | 10.255.60.0/24 | 2 |
+| 70 | Municipal general | 10.255.70.0/24 | 2 |
+| 99 | Nativa (sin uso, endurecida) | — | — |
+| 100 | Gestión de red | 10.255.100.0/24 | 1 y 2 |
+
+Detalle en [security/VLAN-design.md](security/VLAN-design.md).
 
 ---
 
-## Stack Tecnológico
+## Tecnologías
 
-**Alta Disponibilidad**
+**Alta disponibilidad**
 
-- HSRP: dos grupos activo/pasivo, uno por clúster de VLANs
-- LACP IEEE 802.3ad: agregación de enlaces entre switches core
-- RPVST+ IEEE 802.1w: convergencia rápida de spanning tree por VLAN
+- HSRP: dos grupos activo/pasivo, uno por cada conjunto de VLANs, para repartir la carga entre ambos switches de núcleo.
+- LACP (IEEE 802.3ad): agregación de enlaces entre núcleo y distribución.
+- RPVST+: raíz de spanning tree alineada con el gateway HSRP activo de cada grupo.
 
-**Seguridad**
+**Seguridad y monitoreo**
 
-- Fortinet FortiGate 200F en par HA como perímetro de red
-- Suricata IDS/IPS: detección y prevención de intrusiones en línea, modo inline con reglas Emerging Threats
-- Wazuh SIEM: correlación centralizada de eventos de seguridad, integrado nativamente con las alertas de Suricata
-- Rsyslog: recolección de logs de todos los dispositivos de red
-- Port Security: vinculación de MAC en todos los puertos de acceso
-- BPDUGuard + PortFast: endurecimiento de puertos de borde
-- VACL + ACL: filtrado de tráfico entre VLANs
-- SSH en todos los dispositivos, Telnet deshabilitado
+- Fortinet FortiGate 200F en par como perímetro.
+- Snort como IPS, con sus alertas enviadas a Wazuh para correlación.
+- Wazuh (SIEM) integrado con Rsyslog para centralizar los eventos de los equipos de red.
+- Servidor Syslog con sincronización NTP para trazabilidad.
+- Port Security, PortFast y BPDU Guard en puertos de acceso.
+- ACL y VACL para filtrar el tráfico entre VLANs.
+- Administración por SSH.
 
-**Infraestructura Física**
+**Infraestructura física**
 
-- Fibra óptica multimodo OM3 50/125, backbone de 1500m
-- Cableado estructurado UTP Cat6A, completamente etiquetado y documentado
-- 12 racks: 1 core + 11 de distribución-acceso
-
----
-
-## Cumplimiento de Ciberseguridad (Ley N°21.663)
-
-| Requisito                      | Implementación                           |
-| ------------------------------- | ------------------------------------------ |
-| Sistema de detección de incidentes | Wazuh SIEM + Suricata IDS/IPS             |
-| Niveles de alerta definidos      | Matriz de 5 niveles                        |
-| Tiempos máximos de contención    | N1: 4h / N3: 60min / N5: 15min             |
-| Reporte al CSIRT nacional        | Formato de reporte estandarizado documentado |
-| Programa de capacitación         | Programa de 9 módulos para funcionarios municipales |
-| Encargado de seguridad designado | Definido en la documentación de gobernanza |
+- Backbone de fibra óptica multimodo OM3 50/125 (1.500 m).
+- Cableado estructurado UTP Cat 6A etiquetado según ANSI/TIA-606-B.
+- Rack de núcleo de 42U y racks de distribución por piso.
 
 ---
 
-## Demostraciones en Video
+## Cumplimiento de la Ley N° 21.663
 
-Todas las configuraciones fueron probadas y grabadas:
+Medidas propuestas para que el municipio cumpla sus obligaciones como institución obligada:
 
-| Demo                                                                                                        | Descripción                                    |
-| ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| [Servidor DHCP](/LucasHuerta/Muni-Melipilla-Genesis/blob/main/evidence/videos/demo-dhcp-server.mp4)           | Asignación dinámica de IPs en todas las VLANs         |
-| [Redundancia HSRP](/LucasHuerta/Muni-Melipilla-Genesis/blob/main/evidence/videos/demo-hsrp-redundancy.mp4)   | Simulación de failover con caída del switch core      |
-| [Servidor Syslog](/LucasHuerta/Muni-Melipilla-Genesis/blob/main/evidence/videos/demo-syslog-server.mp4)       | Recolección centralizada de logs desde dispositivos Cisco  |
-| [Wazuh SIEM](/LucasHuerta/Muni-Melipilla-Genesis/blob/main/evidence/videos/demo-wazuh-siem.mp4)             | Dashboard de eventos de seguridad y correlación de alertas |
-| [Trazabilidad de Red](/LucasHuerta/Muni-Melipilla-Genesis/blob/main/evidence/videos/demo-network-tracking.mp4) | Verificación de flujo de paquetes de extremo a extremo            |
+| Obligación | Medida propuesta |
+| --- | --- |
+| Detección de incidentes | Wazuh SIEM + Snort IPS + Syslog centralizado |
+| Clasificación de incidentes | Matriz de 5 niveles de alerta |
+| Contención | Tiempos máximos por nivel: N1 4 h · N3 60 min · N5 15 min |
+| Reporte de incidentes al CSIRT Nacional (ANCI) | Alerta temprana en 3 h, segundo reporte en 72 h e informe final en 15 días |
+| Responsable de ciberseguridad | Perfil de encargado de ciberseguridad definido |
+| Concientización | Programa de capacitación para funcionarios |
 
----
-
-## Presupuesto
-
-| Equipo                          | Cant. | Precio Unit. (CLP) | Total (CLP)      |
-| -------------------------------- | ----- | ------------------- | ---------------- |
-| Cisco Catalyst C9500-24Y4C       | 4     | $5.478.820          | $21.915.280      |
-| Cisco Catalyst C9300-48P-A       | 18    | $4.100.000          | $73.800.000      |
-| Dell PowerEdge R440               | 2     | $1.544.897          | $3.089.794       |
-| Fibra Óptica OM3 50/125 (1500m)  | 1     | N/A                  | $1.101.000       |
-| **Total**                         |       |                      | **~$99.906.074** |
+Detalle en [security/compliance-ley21663.md](security/compliance-ley21663.md) y [security/incident-response-plan.md](security/incident-response-plan.md).
 
 ---
 
-## Estructura del Repositorio
+## Pruebas en laboratorio
+
+| Prueba | Resultado | Evidencia |
+| --- | --- | --- |
+| Failover HSRP (caída del switch activo) | El switch en standby asumió el rol de gateway sin pérdida significativa de paquetes | [Video](evidence/videos/demo-hsrp-redundancy.mp4) |
+| Agregación de enlaces | Al desconectar enlaces físicos el tráfico continuó por el canal lógico | — |
+| Aislamiento entre VLANs | Tráfico no autorizado entre VLANs bloqueado por ACL | — |
+| Servidor DHCP (Debian) | Asignación dinámica de direcciones en los rangos de cada VLAN | [Video](evidence/videos/demo-dhcp-server.mp4) |
+| Syslog | Eventos generados (errores, autenticaciones fallidas, desconexiones) registrados con hora sincronizada por NTP | [Video](evidence/videos/demo-syslog-server.mp4) |
+| Wazuh SIEM | Recepción y visualización de eventos de seguridad | [Video](evidence/videos/demo-wazuh-siem.mp4) |
+| Trazabilidad de red | Verificación del flujo de paquetes de extremo a extremo | [Video](evidence/videos/demo-network-tracking.mp4) |
+
+---
+
+## Presupuesto referencial (2025)
+
+| Equipo | Cant. | Precio unit. (CLP) | Total (CLP) |
+| --- | --- | --- | --- |
+| Cisco Catalyst C9500-24Y4C | 4 | $5.478.820 | $21.915.280 |
+| Cisco Catalyst C9300-48P-A | 18 | $4.100.000 | $73.800.000 |
+| Dell PowerEdge R440 | 2 | $1.544.897 | $3.089.794 |
+| Fibra óptica OM3 50/125 (1.500 m) | 1 | — | $1.101.000 |
+| **Total** | | | **$99.906.074** |
+
+Valores basados en cotización parcial a proveedor y precios aproximados para los equipos restantes.
+
+---
+
+## Estructura del repositorio
 
 ```
 Muni-Melipilla-Genesis/
 ├── README.md
-├── diagrams/
-│   ├── topology-logical.png
-│   ├── rack-core.png
-│   ├── floor-plan-physical.vsdx
-│   └── racks-distribution.vsdx
-├── docs/
-│   └── project-report-full.docx
-├── evidence/
-│   └── videos/
-│       ├── demo-dhcp-server.mp4
-│       ├── demo-hsrp-redundancy.mp4
-│       ├── demo-syslog-server.mp4
-│       ├── demo-wazuh-siem.mp4
-│       └── demo-network-tracking.mp4
-├── planning/
-│   └── project-schedule.mpp
-├── presentation/
-│   ├── presentation.pptx
-│   └── presentation.pdf
-└── security/
-    ├── VLAN-design.md
-    ├── incident-response-plan.md
-    └── compliance-ley21663.md
+├── diagrams/          Topología lógica, rack de núcleo, planos y racks (Visio)
+├── docs/              Informe completo del proyecto
+├── evidence/videos/   Grabaciones de las pruebas de laboratorio
+├── planning/          Carta Gantt (MS Project)
+├── presentation/      Presentación final (PPTX y PDF)
+└── security/          Diseño de VLANs, plan de respuesta y cumplimiento normativo
 ```
 
 ---
 
-## Lecciones Aprendidas
+## Lecciones aprendidas
 
-El mayor desafío fue lograr que HSRP y RPVST+ funcionaran correctamente en conjunto. Alinear los root bridges con los gateways HSRP activos de cada clúster de VLANs requirió varias iteraciones y pruebas de failover antes de lograr un comportamiento consistente.
+El mayor desafío fue que HSRP y RPVST+ funcionaran de forma coherente: alinear la raíz de spanning tree con el gateway HSRP activo de cada grupo de VLANs requirió varias iteraciones y pruebas de failover.
 
-Integrar Wazuh con Rsyslog para recibir logs desde dispositivos Cisco también tomó más tiempo del esperado, principalmente por diferencias en el formato de syslog entre versiones de IOS.
+Integrar Wazuh con Rsyslog para recibir los logs de los equipos Cisco tomó más tiempo del esperado, por diferencias en el formato de syslog entre versiones de IOS.
 
 ---
 
 ## Autor
 
-Lucas Huerta Cordero
-Ingeniería en Conectividad y Redes, Duoc UC (2025)
-Santiago, Chile
+**Lucas Huerta Cordero**  
+Técnico en Administración de Redes y Telecomunicaciones, Duoc UC · Estudiante de Ingeniería en Conectividad y Redes  
+Melipilla, Chile
 
 [LinkedIn](https://www.linkedin.com/in/lucas-huerta-cordero) · [GitHub](https://github.com/LucasHuerta)
-
----
-
-*Cisco IOS · Fortinet FortiOS · Wazuh · Suricata · Linux*
