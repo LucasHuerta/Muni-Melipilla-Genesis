@@ -1,87 +1,101 @@
-# Incident Response Plan
-## Municipalidad de Melipilla — Network Security
+# Plan de respuesta a incidentes
 
-**Compliance:** Ley Marco de Ciberseguridad N°21.663 (Chile)
-**Version:** 1.0 | **Date:** 2025
-
----
-
-## Alert Level Matrix
-
-| Level | Trigger Condition | Max Containment Time |
-|---|---|---|
-| **1** | 5+ correlated events in < 15 minutes | 4 hours |
-| **2** | Repeated failed authentications on management VLAN | 2 hours |
-| **3** | Service outage on critical VLAN (10, 20, 40) | 60 minutes |
-| **4** | Unauthorized device detected via port security | 30 minutes |
-| **5** | Data exfiltration > 1 GB detected by IPS | 15 minutes |
+**Ámbito:** red propuesta para la Municipalidad de Melipilla
+**Marco:** Ley N° 21.663 (Ley Marco de Ciberseguridad)
+**Versión:** 1.1 · 2025
 
 ---
 
-## Response Workflow
+## Matriz de niveles de alerta
+
+| Nivel | Condición de activación | Tiempo máximo de contención |
+| --- | --- | --- |
+| **1** | 5 o más eventos correlacionados en menos de 15 minutos | 4 horas |
+| **2** | Autenticaciones fallidas repetidas en la VLAN de gestión | 2 horas |
+| **3** | Caída de servicio en una VLAN crítica (10, 20, 40) | 60 minutos |
+| **4** | Equipo no autorizado detectado por Port Security | 30 minutos |
+| **5** | Exfiltración de datos superior a 1 GB detectada por el IPS | 15 minutos |
+
+---
+
+## Flujo de respuesta
 
 ```
-DETECTION (Wazuh / Snort)
+DETECCIÓN (Wazuh / Snort)
         │
         ▼
-CLASSIFICATION (Level 1–5)
+CLASIFICACIÓN (nivel 1–5)
         │
-        ├─ Level 1–2 → IT Team notified → investigate & document
+        ├─ Nivel 1–2 → Equipo de Informática notificado → investiga y documenta
         │
-        ├─ Level 3–4 → Security Officer activated → isolate affected VLAN
+        ├─ Nivel 3–4 → Se activa al encargado de ciberseguridad → aislamiento de la VLAN afectada
         │
-        └─ Level 5 → CSIRT Nacional notified within 3 hours (legal requirement)
-                   → Evidence preservation
-                   → Management escalation
+        └─ Nivel 5 → Alerta temprana al CSIRT Nacional (ANCI) dentro de 3 horas
+                   → Preservación de evidencia
+                   → Escalamiento a la autoridad municipal
 ```
+
+Cualquier incidente de nivel 4 o 5 con efectos significativos se reporta al CSIRT Nacional según los plazos legales: alerta temprana en 3 horas, segundo reporte en 72 horas e informe final en 15 días.
+
+## Contención rápida
+
+1. Identificar la VLAN afectada.
+2. Bloquear los puertos comprometidos.
+3. Respaldar la configuración de los equipos involucrados.
+4. Notificar al CSIRT Nacional con el formato definido.
 
 ---
 
-## Critical Systems Inventory
+## Inventario de sistemas críticos
 
-| System | VLAN | Criticality | Recovery Priority |
-|---|---|---|---|
-| Core switches SWC1/SWC2 | 100 | Critical | P1 |
-| Fortinet FortiGate HA pair | — | Critical | P1 |
-| DHCP + Syslog Server | 40 | High | P2 |
-| Wazuh SIEM + Snort IPS | 40 | High | P2 |
-| Finance systems (VLAN 10) | 10 | High | P2 |
-| Alcaldía systems | 20 | Medium | P3 |
-
----
-
-## CSIRT Nacional Report Format
-
-When a Level 4–5 incident occurs, the following must be reported:
-
-```
-- Ticket number (internal)
-- Detection date and time
-- Technical description of the incident
-- Affected VLANs or servers
-- Evidence: packet captures, Wazuh alerts, Snort logs
-- Containment measures applied
-- Current network status
-- Estimated impact (users affected, data at risk)
-```
-
-**Reporting channel:** https://csirt.gob.cl
+| Sistema | VLAN | Criticidad | Prioridad de recuperación |
+| --- | --- | --- | --- |
+| Switches de núcleo SWC1 / SWC2 | 100 | Crítica | P1 |
+| Par de firewalls FortiGate | — | Crítica | P1 |
+| Enlaces a Internet | — | Crítica | P1 |
+| Servidor DHCP + Syslog | 40 | Alta | P2 |
+| Wazuh SIEM + Snort IPS | 40 | Alta | P2 |
+| Sistemas de Finanzas | 10 | Alta | P2 |
+| Sistemas de Alcaldía | 20 | Media | P3 |
 
 ---
 
-## Staff Security Training Program
+## Contenido del reporte al CSIRT Nacional
 
-9-module program delivered to all municipal employees:
+```
+- Número de ticket interno
+- Fecha y hora de detección
+- Descripción técnica del incidente
+- VLANs o servidores afectados
+- Evidencia: capturas de tráfico, alertas de Wazuh, logs de Snort
+- Medidas de contención aplicadas
+- Estado actual de la red
+- Impacto estimado (usuarios afectados, datos en riesgo)
+```
 
-1. What is cybersecurity and why it matters
-2. Common threats: phishing, ransomware, social engineering
-3. Password best practices and MFA
-4. Email and web browsing security
-5. Mobile device and remote work security
-6. Internal security policies
-7. Incident reporting procedures (who to call, when)
-8. Software updates and patch management
-9. Multi-factor authentication (MFA) setup and use
+**Canal:** plataforma de reporte de incidentes de la Agencia Nacional de Ciberseguridad (ANCI).
 
-**Training frequency:** Annual mandatory + quarterly reminders
-**Responsible:** IT Department (VLAN 40 team)
+## Registro documental
+
+- **Bitácora del incidente:** fecha, hora, VLANs o equipos afectados y acciones realizadas.
+- **Informe forense:** hash SHA-256 de las evidencias y diagrama del ataque basado en MITRE ATT&CK.
+- **Reporte al CSIRT Nacional:** según el formato anterior.
+
+---
+
+## Programa de capacitación
+
+Programa anual de 9 módulos para funcionarios municipales:
+
+1. Qué es la ciberseguridad y por qué importa
+2. Amenazas comunes: phishing, ransomware e ingeniería social
+3. Buenas prácticas de contraseñas
+4. Seguridad en el correo y la navegación web
+5. Seguridad en dispositivos móviles y trabajo remoto
+6. Políticas internas de seguridad
+7. Cómo reportar un incidente (a quién y cuándo)
+8. Actualizaciones de software y parches
+9. Configuración y uso de la autenticación multifactor (MFA)
+
+**Frecuencia:** anual obligatoria, con recordatorios trimestrales
+**Responsable:** Departamento de Informática
