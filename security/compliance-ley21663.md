@@ -1,45 +1,54 @@
-# Compliance Documentation
-## Ley Marco de Ciberseguridad N°21.663 — Chile
+# Cumplimiento normativo
+
+## Ley N° 21.663 — Ley Marco de Ciberseguridad
+
+Medidas incluidas en el diseño propuesto. Al tratarse de una propuesta validada en laboratorio, el estado indica si la obligación quedó **cubierta en el diseño**, no si está implementada en el municipio.
+
+| Obligación | Estado en el diseño | Medida propuesta |
+| --- | --- | --- |
+| Responsable de ciberseguridad | Cubierta | Perfil de encargado de ciberseguridad (requisitos y certificaciones) |
+| Identificación de sistemas críticos | Cubierta | Inventario en el [plan de respuesta](incident-response-plan.md) |
+| Detección de incidentes | Cubierta | Wazuh SIEM + Snort IPS + Syslog centralizado |
+| Niveles de alerta | Cubierta | Matriz de 5 niveles |
+| Tiempos máximos de contención | Cubierta | N1: 4 h · N3: 60 min · N5: 15 min |
+| Reporte de incidentes al CSIRT Nacional (ANCI) | Cubierta | Procedimiento y formato de reporte con los plazos legales |
+| Capacitación del personal | Cubierta | Programa anual para funcionarios |
+| Registro documental de incidentes | Cubierta | Bitácora, informe forense y reporte al CSIRT |
+| Auditorías de seguridad | Propuesta | Auditoría externa anual |
+
+### Plazos de reporte de incidentes
+
+| Reporte | Plazo |
+| --- | --- |
+| Alerta temprana | 3 horas desde que se toma conocimiento del incidente |
+| Segundo reporte | 72 horas |
+| Informe final | 15 días desde la alerta temprana |
+
+Los reportes se envían al CSIRT Nacional a través de la plataforma de la Agencia Nacional de Ciberseguridad (ANCI).
 
 ---
 
-## Compliance Status Summary
+## Ley N° 21.180 — Transformación Digital del Estado
 
-| Requirement | Status | Implementation |
-|---|---|---|
-| Cybersecurity officer designated | ✅ Compliant | IT Department Head |
-| Critical systems identified | ✅ Compliant | See inventory in IRP |
-| Incident detection system | ✅ Compliant | Wazuh SIEM + Snort IPS |
-| Alert levels defined | ✅ Compliant | 5-tier matrix |
-| Max containment times defined | ✅ Compliant | L1:4h / L3:60m / L5:15m |
-| CSIRT reporting procedure | ✅ Compliant | Documented format |
-| Staff training program | ✅ Compliant | 9-module annual program |
-| Incident documentation process | ✅ Compliant | Ticket-based system |
-| Security audits planned | ✅ Compliant | Annual external audit |
-| ISO 27001 alignment | ✅ Partial | Controls mapped |
+| Exigencia | Preparación desde la red |
+| --- | --- |
+| Gestión documental digital | Infraestructura de red con capacidad y segmentación para soportarla |
+| Servicios en línea a la ciudadanía | Doble enlace a Internet y núcleo redundante |
+| Expedientes electrónicos | Segmentos dedicados (VLAN 10 y 50) |
 
 ---
 
-## Ley N°21.180 — Digital Transformation
+## Controles técnicos y su relación con ISO/IEC 27001:2022 (Anexo A)
 
-Target compliance date: **2027**
-
-| Requirement | Preparation Status |
-|---|---|
-| Digital document management | Infrastructure ready (network layer) |
-| Online citizen services | Network capacity supports rollout |
-| Electronic record systems | VLAN 10/50 allocated for future services |
-
----
-
-## Technical Controls Mapped to ISO 27001
-
-| ISO 27001 Control | Implementation |
-|---|---|
-| A.9 — Access Control | VLAN segmentation + Port Security + ACLs |
-| A.10 — Cryptography | SSH on all devices, HTTPS on management |
-| A.12 — Operations Security | Wazuh monitoring + Syslog centralization |
-| A.13 — Communications Security | VLAN isolation + Inter-VLAN ACLs |
-| A.16 — Incident Management | 5-level response plan + CSIRT reporting |
-| A.17 — Business Continuity | HSRP redundancy + LACP link aggregation |
-| A.18 — Compliance | This document |
+| Control | Medida en el diseño |
+| --- | --- |
+| 5.24 – 5.26 Gestión de incidentes | Plan de respuesta de 5 niveles y reporte al CSIRT Nacional |
+| 5.30 Preparación de TIC para la continuidad | HSRP, LACP y doble enlace a Internet |
+| 6.3 Concientización y capacitación | Programa de capacitación para funcionarios |
+| 7.11 Servicios de soporte | UPS en sala principal y puntos críticos |
+| 8.5 Autenticación segura | Administración de equipos por SSH |
+| 8.15 Registro de eventos | Syslog centralizado y Wazuh |
+| 8.16 Actividades de monitoreo | Wazuh SIEM y Snort IPS |
+| 8.17 Sincronización de relojes | NTP en todos los equipos |
+| 8.20 Seguridad de redes | Port Security, BPDU Guard, ACL y VACL |
+| 8.22 Segregación de redes | Segmentación por VLAN y gestión aislada (VLAN 100) |
